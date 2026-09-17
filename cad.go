@@ -316,7 +316,7 @@ func main() {
 						_,ok = verts[name]
 						i++
 					}
-					stuff = fmt.Sprintf("line l%d = [.5,0,0.2],[-.5,0,0.2]",len(verts))
+					stuff = fmt.Sprintf("line l%d = [[.5,0,0.2],[-.5,0,0.2]]",len(verts))
 				}
 				i := strings.Index(stuff,"=")
 				if i != -1 {
