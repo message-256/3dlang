@@ -6,5 +6,3 @@ type = [point|triangle|line]: declares a variable with type type with defualt va
 point x = [x,y,z]: declares a point with x,y,z = [x,y,z]\
 line x = p1,p2: declares a line with an n,m of p1,p2\
 triangle t = p1,p2,p3: declares a triangle with an a,b,c of p1,p2,p3\
-# extra
-variables arent readable when assigning. ill get to that in a couple of hours maybe
