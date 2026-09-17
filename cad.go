@@ -11,6 +11,7 @@ import (
 	"strings"
 	"unicode"
 	"strconv"
+	"slices"
 )
 
 type point struct {
@@ -156,34 +157,60 @@ func splitAssumingConstructs(this string) ([]string,error) {
 const special = "|\\+=-(){}*&^%$#@!~\".><?/"
 type variables map[string]variable
 func (context variables)valueof(this string) (variable,error){
-	strings.ReplaceAll(right," ","")
-	things,err := splitAssumingConstructs(right)
+	strings.ReplaceAll(this," ","")
+	if this == "" {
+		return nil,errors.New("nil expr some how got into valueof")
+	}
+	var allletters bool = true
+	for i := range this {
+		if !unicode.IsLetter(rune(this[i])){
+			allletters = false	
+		}
+	}
+	if allletters {
+		v,ok := context[this]
+		if !ok {
+			return nil,errors.New("variable does not exist")
+		}
+		return v,nil
+	}
+	if this[0] != '[' {
+		return nil,errors.New("grouped with no [")
+	}
+ 	if this[len(this)-1] != ']' {
+		return nil,errors.New("grouped but no ]")
+	}
+	fmt.Println(this)
+
+	things,err := splitAssumingConstructs(this[1:len(this)-1])
 	if err != nil {
 		return nil,err
 	}
-	if len(things) == 1 {
-		if strings.ContainsFunc(things[0],func(c rune) bool {return !unicode.IsLetter(c)}){
-			stuff := strings.ReplaceAll(things[0]," ","")
-			var p point
-			n,err := fmt.Sscanf(stuff,"[%f,%f,%f]",&p.x,&p.y,&p.z)
-			if n<0 {
-				return nil,errors.New("scanf couldnt find enough floats")
-			}
-			if err != nil {
-				return nil,err
-			}
-			return p,nil
+	
+	if len(things) == 3 && slices.ContainsFunc(things,func(s string) bool {return unicode.IsDigit(rune(s[0]))}) {
+		var floats [3]float32
+		var collective error
+		for i := range things {
+			f,err := strconv.ParseFloat(things[i],32)
+			floats[i] = float32(f)
+			collective = errors.Join(collective,err)
 		}
+		if collective != nil {
+			return nil,collective
+		}
+		return point{floats[0],floats[1],floats[2]},nil
 	} else if len(things) == 2 {
 		var collective error
 		var l line
-		v,err := context.valueof([]string{things[0]})
+		var v[2] variable
+		var err error
+		v[0],err = context.valueof(things[0])
 		collective = errors.Join(collective,err)
-		l.n,err = v.aspoint()
+ 		v[1],err = context.valueof(things[1])
 		collective = errors.Join(collective,err)
-		v,err = context.valueof([]string{things[1]})
+		l.n ,err = v[0].aspoint()
 		collective = errors.Join(collective,err)
-		l.m,err = v.aspoint()
+		l.m ,err = v[1].aspoint()
 		collective = errors.Join(collective,err)
 		if collective != nil {
 			return nil,collective
@@ -194,14 +221,13 @@ func (context variables)valueof(this string) (variable,error){
 		var t triangle
 		var v [3]variable
 		var err error
-		v[0],err = context.valueof([]string{things[0]})
+		v[0],err = context.valueof(things[0])
 		collective = errors.Join(collective,err)
 		collective = errors.Join(collective,err)
-		v[1],err = context.valueof([]string{things[1]})
+		v[1],err = context.valueof(things[1])
 		collective = errors.Join(collective,err)
 		collective = errors.Join(collective,err)
-		v[2],err = context.valueof([]string{things[2]})
-		collective = errors.Join(collective,err)
+		v[2],err = context.valueof(things[2])
 		collective = errors.Join(collective,err)
 		if collective != nil {
 			return nil,collective
@@ -270,7 +296,7 @@ func main() {
 						_,ok = verts[name]
 						i++
 					}
-					stuff = fmt.Sprintf("triangle t%d = [0,0.5,0.1],[-0.5,-0.5,0.1],[0.5,-0.5,0.1]",len(verts))
+					stuff = fmt.Sprintf("triangle t%d = [[0,0.5,0.1],[-0.5,-0.5,0.1],[0.5,-0.5,0.1]]",len(verts))
 				}
 				if strings.ReplaceAll(stuff," ","") == "point" {
 					var i int
