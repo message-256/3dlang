@@ -296,7 +296,7 @@ func main() {
 						_,ok = verts[name]
 						i++
 					}
-					stuff = fmt.Sprintf("triangle t%d = [[0,0.5,0.1],[-0.5,-0.5,0.1],[0.5,-0.5,0.1]]",len(verts))
+					stuff = fmt.Sprintf("triangle t%d = [[0,0.5,0.1],[-0.5,-0.5,0.1],[0.5,-0.5,0.1]]",i)
 				}
 				if strings.ReplaceAll(stuff," ","") == "point" {
 					var i int
@@ -306,7 +306,7 @@ func main() {
 						_,ok = verts[name]
 						i++
 					}
-					stuff = fmt.Sprintf("point p%d = [0,0,0]",len(verts))
+					stuff = fmt.Sprintf("point p%d = [0,0,0]",i)
 				}
 				if strings.ReplaceAll(stuff," ","") == "line" {
 					var i int
@@ -316,7 +316,7 @@ func main() {
 						_,ok = verts[name]
 						i++
 					}
-					stuff = fmt.Sprintf("line l%d = [[.5,0,0.2],[-.5,0,0.2]]",len(verts))
+					stuff = fmt.Sprintf("line l%d = [[.5,0,0.2],[-.5,0,0.2]]",i)
 				}
 				i := strings.Index(stuff,"=")
 				if i != -1 {
